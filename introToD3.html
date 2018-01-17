@@ -14,13 +14,13 @@
     <script>
         //SMALL HELPERS
         // in d3, source data is plain old JS objects!!
-        const numbers = [5, 4,10,1];
-        data = [
-            {date: '2014-01-01', amount: 10},
-            {date: '2014-02-01', amount: 20},
-            {date: '2014-03-01', amount: 40},
-            {date: '2014-04-01', amount: 80},
-        ];
+        // const numbers = [5, 4,10,1];
+        // data = [
+        //     {date: '2014-01-01', amount: 10},
+        //     {date: '2014-02-01', amount: 20},
+        //     {date: '2014-03-01', amount: 40},
+        //     {date: '2014-04-01', amount: 80},
+        // ];
         // console.log(d3.min(numbers));
 
         //its common to pass callbacks that are used on all elements in a group
@@ -38,20 +38,20 @@
 
         //lets set up the y-scale for the above money example
         //in this example, y is now considered a 'scale object'
-        const y = d3.scaleLinear()
-                    .domain([0, 80])
-                    .range([200,0]);//this seems backward, but svg origins start at the top left, so they are considered 'y-down', whereas graphs are 'y-up'
+        // const y = d3.scaleLinear()
+        //             .domain([0, 80])
+        //             .range([200,0]);//this seems backward, but svg origins start at the top left, so they are considered 'y-down', whereas graphs are 'y-up'
 
         //the scale object is also a function!! So we can call y() on a number, and it will translate values from one coordinate to another
         // console.log(y(0))
 
         //lets try the same with dates on the x axis!!
-        const x = d3.scaleTime()
-                    .domain([
-                        new Date(Date.parse('2014-01-01')),
-                        new Date(Date.parse('2014-04-01'))
-                    ])
-                    .range([0,300]);
+        // const x = d3.scaleTime()
+        //             .domain([
+        //                 new Date(Date.parse('2014-01-01')),
+        //                 new Date(Date.parse('2014-04-01'))
+        //             ])
+        //             .range([0,300]);
         //now lets try calling x() to change a date into pixels!
         // console.log(x(new Date(Date.parse('2014-02-01'))))
 
@@ -59,8 +59,8 @@
 
         //lets look at building our axes, starting with the x axis
         //remember, x is d3.scaleTime()
-        const xAxis = d3.axisBottom(x)
-                        .ticks(4)//specifies how many ticks on the axis
+        // const xAxis = d3.axisBottom(x)
+        //                 .ticks(4)//specifies how many ticks on the axis
         //lets make an svg element, which will form the x axis visually
         // const svg = d3.select('body')
         //             .append('svg')//creates an svg element with ing the body
@@ -90,13 +90,54 @@
         const svg = d3.select('svg')//we have an empty <svg> element in the body
         svg.size();//returns 1, there is 1 svg element that exists on the page
 
-        const rects = svg.selectAll('rect')
-            .data(sales);
+        var rects = svg.selectAll('rect')
+            .data(sales);//binds the data in the sales array to the <rect> elements
 
         rects.size();//returns 0, there are no <rect> elements yet!
 
-        
+        //right now we are creating the first data binding, so it is pretty straightforward to add the datapoints. The next selection will be more complex, as we will only want to add the NEW data points since the last join
+        const newRects = rects.enter();
+        //newRects represents the data points that have no elements, so we use append to add new elements
 
+        const maxCount = d3.max(sales, (d, i)=>{
+            return d.count
+        });
+
+        const x = d3.scaleLinear()
+            .domain([0, maxCount])//input amount in units
+            .range([0,300])//output amount in px
+            
+        const y = d3.scaleBand()
+            .rangeRound([0,75])
+            .domain(sales.map((d,i)=>{
+                return d.product
+            }));
+
+        newRects.append('rect')
+            .attr('x', x(0))
+            .attr('y',(d,i)=>{
+                return y(d.product)
+            })
+            .attr('height', y.bandwidth())
+            .attr('width', (d,i)=>{
+                return x(d.count)
+            })
+
+            //just like you can add new elements for datapoints that have been created since the last binding, you can also remove elements for datapoints that no longer exist
+
+            sales.pop();//removes the last element from the array
+
+            rects = svg.selectAll('rect')
+                    .data(sales);//joins the data again
+
+            let rectsToRemove = rects.exit();
+
+            console.log(rectsToRemove)
+
+            rectsToRemove.size();//returns 1, one elements is part of the exit selection
+
+            rectsToRemove.remove();
+        
 
     </script>
 </body>
