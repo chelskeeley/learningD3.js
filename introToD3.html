@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Intro to d3</title>
+</head>
+<body>
+    <svg>
+
+    </svg>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.12.2/d3.min.js"></script>
+    <script>
+        //SMALL HELPERS
+        // in d3, source data is plain old JS objects!!
+        const numbers = [5, 4,10,1];
+        data = [
+            {date: '2014-01-01', amount: 10},
+            {date: '2014-02-01', amount: 20},
+            {date: '2014-03-01', amount: 40},
+            {date: '2014-04-01', amount: 80},
+        ];
+        // console.log(d3.min(numbers));
+
+        //its common to pass callbacks that are used on all elements in a group
+        //almost always called back with two arguments: d (the element), and i (index)
+        // console.log(d3.max(data, (d,i)=>{
+        //     return d.amount
+        // }))
+
+        // console.log(d3.extent(numbers))
+
+        //SCALES
+        //with linear scales, the domain for an axis sets the input domain (eg. 0$ to $80 on the y axis), or the 'data space', so the units are your source units ($)
+        //range is the output range (eg. 0px to 200px), or 'screen space'
+        //you will have a domain and range for BOTH the x and y axis
+
+        //lets set up the y-scale for the above money example
+        //in this example, y is now considered a 'scale object'
+        const y = d3.scaleLinear()
+                    .domain([0, 80])
+                    .range([200,0]);//this seems backward, but svg origins start at the top left, so they are considered 'y-down', whereas graphs are 'y-up'
+
+        //the scale object is also a function!! So we can call y() on a number, and it will translate values from one coordinate to another
+        // console.log(y(0))
+
+        //lets try the same with dates on the x axis!!
+        const x = d3.scaleTime()
+                    .domain([
+                        new Date(Date.parse('2014-01-01')),
+                        new Date(Date.parse('2014-04-01'))
+                    ])
+                    .range([0,300]);
+        //now lets try calling x() to change a date into pixels!
+        // console.log(x(new Date(Date.parse('2014-02-01'))))
+
+        //AXES
+
+        //lets look at building our axes, starting with the x axis
+        //remember, x is d3.scaleTime()
+        const xAxis = d3.axisBottom(x)
+                        .ticks(4)//specifies how many ticks on the axis
+        //lets make an svg element, which will form the x axis visually
+        // const svg = d3.select('body')
+        //             .append('svg')//creates an svg element with ing the body
+        //                 .attr('width', 300)//sets the dimensions
+        //                 .attr('height', 150);
+        
+        // svg.append('g')//creates an svg <g> element
+        //     .attr('class', 'x axis')//gives it a class
+        //     .call(xAxis)//actually creates the axis
+
+    //DATA BINDING
+        //loosly speaking, data binding is taking data and transforming it into something visible
+        
+        //SELECTIONS
+        //d3 selections are a group of elements that match a query or COULD match a query later(the elements may not have been constructed yet!)
+        //selections are used to map pieces of data to elements in the DOM
+
+        const sales = [
+            {product: 'Hoodie', count: 7},
+            {product: 'Jacket', count: 6},
+            {product: 'Snuggie', count: 9},
+        ]
+
+        //to map these to a scatterplot, each object in the sales array would have to be turned into a <rect> tag inside an svg element
+        //to connect the two, we are going to create a selection, and use .data() to bind our data to the selection
+
+        const svg = d3.select('svg')//we have an empty <svg> element in the body
+        svg.size();//returns 1, there is 1 svg element that exists on the page
+
+        const rects = svg.selectAll('rect')
+            .data(sales);
+
+        rects.size();//returns 0, there are no <rect> elements yet!
+
+        
+
+
+    </script>
+</body>
+</html>
