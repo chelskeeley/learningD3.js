@@ -87,58 +87,89 @@
         //to map these to a scatterplot, each object in the sales array would have to be turned into a <rect> tag inside an svg element
         //to connect the two, we are going to create a selection, and use .data() to bind our data to the selection
 
-        const svg = d3.select('svg')//we have an empty <svg> element in the body
-        svg.size();//returns 1, there is 1 svg element that exists on the page
+        // const svg = d3.select('svg')//we have an empty <svg> element in the body
+        // svg.size();//returns 1, there is 1 svg element that exists on the page
 
-        var rects = svg.selectAll('rect')
-            .data(sales);//binds the data in the sales array to the <rect> elements
+        // var rects = svg.selectAll('rect')
+        //     .data(sales);//binds the data in the sales array to the <rect> elements
 
-        rects.size();//returns 0, there are no <rect> elements yet!
+        // rects.size();//returns 0, there are no <rect> elements yet!
 
         //right now we are creating the first data binding, so it is pretty straightforward to add the datapoints. The next selection will be more complex, as we will only want to add the NEW data points since the last join
-        const newRects = rects.enter();
+        // const newRects = rects.enter();
         //newRects represents the data points that have no elements, so we use append to add new elements
 
-        const maxCount = d3.max(sales, (d, i)=>{
-            return d.count
-        });
+        // const maxCount = d3.max(sales, (d, i)=>{
+        //     return d.count
+        // });
 
-        const x = d3.scaleLinear()
-            .domain([0, maxCount])//input amount in units
-            .range([0,300])//output amount in px
+        // const x = d3.scaleLinear()
+        //     .domain([0, maxCount])//input amount in units
+        //     .range([0,300])//output amount in px
             
-        const y = d3.scaleBand()
-            .rangeRound([0,75])
-            .domain(sales.map((d,i)=>{
-                return d.product
-            }));
+        // const y = d3.scaleBand()
+        //     .rangeRound([0,75])
+        //     .domain(sales.map((d,i)=>{
+        //         return d.product
+        //     }));
 
-        newRects.append('rect')
-            .attr('x', x(0))
-            .attr('y',(d,i)=>{
-                return y(d.product)
-            })
-            .attr('height', y.bandwidth())
-            .attr('width', (d,i)=>{
-                return x(d.count)
-            })
+        // newRects.append('rect')
+        //     .attr('x', x(0))
+        //     .attr('y',(d,i)=>{
+        //         return y(d.product)
+        //     })
+        //     .attr('height', y.bandwidth())
+        //     .attr('width', (d,i)=>{
+        //         return x(d.count)
+        //     })
 
             //just like you can add new elements for datapoints that have been created since the last binding, you can also remove elements for datapoints that no longer exist
 
-            sales.pop();//removes the last element from the array
+            // sales.pop();//removes the last element from the array
 
-            rects = svg.selectAll('rect')
-                    .data(sales);//joins the data again
+            // rects = svg.selectAll('rect')
+            //         .data(sales);//joins the data again
 
-            let rectsToRemove = rects.exit();
+            // let rectsToRemove = rects.exit();
 
-            console.log(rectsToRemove)
+            // // console.log(rectsToRemove)
 
-            rectsToRemove.size();//returns 1, one elements is part of the exit selection
+            // rectsToRemove.size();//returns 1, one elements is part of the exit selection
 
-            rectsToRemove.remove();
-        
+            // rectsToRemove.remove();
 
+            //IDENTITY AND KEY FUNCTION
+            //it is very difficult to determine object equality
+            //to help this, in addition to the selection.data() method that we learned earlier, there is a second paramater we can pass it called the Key Function!
+
+            const sales1 = [
+                {product: 'Hoodie', count: 7},
+                {product: 'Jacket', count: 6}
+            ];
+            const sales2 = [
+                { product: 'Jacket', count: 6 },
+                {product: 'Snuggie', count: 9}
+            ];
+
+            const svg = d3.select('svg')//we have an empty <svg> element in the body
+
+            const rects = svg.selectAll('rect')
+                .data(sales1, (d,i)=>{
+                    return d.product
+                })
+
+            rects.enter().append('rect');
+
+            rects.size();
+            //this produces 2, the first data join adds 2 new elements
+
+            const nextRects = rects.data(sales2, (d,i)=> d.product);
+
+            nextRects.exit().size();
+            //the exit size is 1, one elements to remove. In this case exit() is the duplicate data point between the 2 arrays
+            nextRects.exit().remove();
+
+            nextRects.enter().append('rect')
     </script>
 </body>
 </html>
